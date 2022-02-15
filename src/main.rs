@@ -1,14 +1,17 @@
 use bevy::prelude::*;
 
-const WINDOW_HEIGHT: f32 = 500.;
-const WINDOW_WIDTH: f32 = 500.;
+mod menu;
+mod states;
+
+const WINDOW_HEIGHT: f32 = 1000.;
+const WINDOW_WIDTH: f32 = 1000.;
 const PLAYER_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);
 
 struct GameOverEvent;
 
 #[derive(Component)]
 struct Player {
-    velocity: f32, 
+    velocity: f32,
     space_pressed: bool,
 }
 
@@ -35,7 +38,10 @@ fn spawn_player(mut commands: Commands) {
         });
 }
 
-fn gravity_and_move(mut game_over_writer: EventWriter<GameOverEvent>, mut query: Query<(&mut Player, &mut Transform)>) {
+fn gravity_and_move(
+    mut game_over_writer: EventWriter<GameOverEvent>,
+    mut query: Query<(&mut Player, &mut Transform)>,
+) {
     for (mut player, mut transform) in query.iter_mut() {
         if player.velocity < 5.0 {
             player.velocity += 0.2
@@ -72,8 +78,17 @@ fn game_over(commands: Commands, mut game_over_reader: EventReader<GameOverEvent
 
 fn main() {
     App::new()
+        .insert_resource(WindowDescriptor {
+            width: WINDOW_WIDTH,
+            height: WINDOW_HEIGHT,
+            title: "Flappy".to_string(),
+            resizable: false,
+            ..Default::default()
+        })
         .add_plugins(DefaultPlugins)
+        .add_plugin(menu::MenuPlugin)
         .add_startup_system(setup_camera)
+        .add_state(states::GameState::MainMenu)
         .add_startup_system(spawn_player)
         .add_system(gravity_and_move)
         .add_system(flap)
