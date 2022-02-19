@@ -2,14 +2,13 @@ use crate::states::GameState;
 use bevy::app::AppExit;
 use bevy::prelude::*;
 
-
 #[derive(Component)]
 pub struct MainMenu;
 
-#[derive(Clone, Copy)]
-enum MenuItem {
+#[derive(Clone, Component, Copy)]
+pub enum MenuButton {
     Play,
-    Exit,
+    Quit,
 }
 
 pub fn setup_main_menu(
@@ -17,7 +16,7 @@ pub fn setup_main_menu(
     asset_server: ResMut<AssetServer>,
     mut clear_color: ResMut<ClearColor>,
 ) {
-    let font: Handle<Font> = asset_server.load("fonts/RobotMono-Regular.tff");
+    let font: Handle<Font> = asset_server.load("fonts/RobotoMono-Regular.ttf");
 
     // set menu background to black
     clear_color.0 = Color::BLACK;
@@ -26,15 +25,15 @@ pub fn setup_main_menu(
         .spawn_bundle(NodeBundle {
             style: Style {
                 size: Size {
-                    width: Val::Percent(100),
-                    height: Val::Percent(100),
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
                 },
                 flex_direction: FlexDirection::ColumnReverse,
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::SpaceEvenly,
                 ..Style::default()
             },
-            visiblity: Visibility {
+            visibility: Visibility {
                 is_visible: false,
                 ..Visibility::default()
             },
@@ -47,8 +46,8 @@ pub fn setup_main_menu(
                     "Welcome to Flappy",
                     TextStyle {
                         font: font.clone(),
-                        font_size: 50,
-                        color: Color::White,
+                        font_size: 50.,
+                        color: Color::WHITE,
                     },
                     TextAlignment {
                         vertical: VerticalAlign::Center,
@@ -57,12 +56,12 @@ pub fn setup_main_menu(
                 ),
                 ..TextBundle::default()
             });
-            spawn_button(&mut parent, font.clone(), MenuItem::Play);
-            spawn_button(&mut parent, font.clone(), MenuItem::Exit);
+            spawn_button(&mut parent, font.clone(), MenuButton::Play);
+            spawn_button(&mut parent, font.clone(), MenuButton::Quit);
         });
 }
 
-fn spawn_button(parent: &mut ChildBuilder, font: Handle<Font>, menu_item: MenuItem) {
+fn spawn_button(parent: &mut ChildBuilder, font: Handle<Font>, menu_item: MenuButton) {
     parent
         .spawn_bundle(ButtonBundle {
             style: Style {
@@ -83,8 +82,8 @@ fn spawn_button(parent: &mut ChildBuilder, font: Handle<Font>, menu_item: MenuIt
                 style: Style::default(),
                 text: Text::with_section(
                     match menu_item {
-                        MenuItem::Play => "Play",
-                        MenuItem::Quit => "Quit",
+                        MenuButton::Play => "Play",
+                        MenuButton::Quit => "Quit",
                     },
                     TextStyle {
                         font: font.clone(),
@@ -103,16 +102,16 @@ fn spawn_button(parent: &mut ChildBuilder, font: Handle<Font>, menu_item: MenuIt
 
 pub fn handle_button_click(
     mut exit_event: EventWriter<AppExit>,
-    mut state: ResMut<GameState>,
-    query: Query<(&Interaction, &MenuItem)>,
+    mut state: ResMut<State<GameState>>,
+    query: Query<(&Interaction, &MenuButton)>,
 ) {
     query.for_each(|(interaction, item)| match interaction {
         Interaction::Clicked => match item {
-            MenuItem::Play => state
+            MenuButton::Play => state
                 .push(GameState::Play)
                 .map_err(|err| error!("Failed to start game: {}", err))
                 .unwrap(),
-            MenuItem::Exit => exit_event.send(AppExit),
+            MenuButton::Quit => exit_event.send(AppExit),
         },
         Interaction::Hovered => {}
         _ => {}

@@ -6,7 +6,7 @@ mod main_menu;
 pub struct MenuPlugin;
 
 impl Plugin for MenuPlugin {
-    fn build(&self, app: &mut AppBuilder) {
+    fn build(&self, app: &mut App) {
         app.add_system_set(
             SystemSet::on_enter(GameState::MainMenu)
                 .with_system(main_menu::setup_main_menu.system()),
