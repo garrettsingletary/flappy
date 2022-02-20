@@ -108,7 +108,7 @@ pub fn handle_button_click(
     query.for_each(|(interaction, item)| match interaction {
         Interaction::Clicked => match item {
             MenuButton::Play => state
-                .push(GameState::Play)
+                .set(GameState::Play)
                 .map_err(|err| error!("Failed to start game: {}", err))
                 .unwrap(),
             MenuButton::Quit => exit_event.send(AppExit),

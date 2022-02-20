@@ -71,12 +71,18 @@ fn flap(keyboard_input: Res<Input<KeyCode>>, mut query: Query<&mut Player>) {
     }
 }
 
-fn game_over(mut commands: Commands, mut state: ResMut<State<GameState>>, query: Query<Entity>) {
+fn reset_player(mut query: Query<(&mut Player, &mut Transform)>) {
+    for (mut player, mut transform) in query.iter_mut() {
+        player.velocity = 0.0;
+        transform.translation.y = 0.0;
+    }
+}
+
+fn game_over(mut commands: Commands, mut state: ResMut<State<GameState>>, query: Query<Entity, With<Player>>) {
     for entity in query.iter() {
-        commands.entity(entity).despawn();
+        commands.entity(entity).despawn_recursive();
     }
     state.set(GameState::MainMenu).unwrap();
-    println!("GAME OVER");
 }
 
 fn main() {
@@ -91,13 +97,14 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(menu::MenuPlugin)
         .add_startup_system(setup_camera)
-        .add_state(states::GameState::MainMenu)
-        .add_system_set(SystemSet::on_enter(states::GameState::Play).with_system(spawn_player))
+        .add_state(GameState::MainMenu)
+        .add_system_set(SystemSet::on_enter(GameState::Play).with_system(spawn_player))
         .add_system_set(
-            SystemSet::on_update(states::GameState::Play)
+            SystemSet::on_update(GameState::Play)
                 .with_system(gravity_and_move)
                 .with_system(flap),
         )
-        .add_system_set(SystemSet::on_enter(states::GameState::GameOver).with_system(game_over))
+        .add_system_set(SystemSet::on_exit(GameState::Play).with_system(reset_player))
+        .add_system_set(SystemSet::on_enter(GameState::GameOver).with_system(game_over))
         .run()
 }
