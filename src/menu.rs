@@ -11,6 +11,33 @@ pub enum MenuButton {
     Quit,
 }
 
+pub struct MenuPlugin;
+
+impl Plugin for MenuPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_system_set(
+            SystemSet::on_enter(GameState::MainMenu)
+                .with_system(setup_main_menu.system()),
+        )
+        .add_system_set(
+            SystemSet::on_resume(GameState::MainMenu)
+                .with_system(setup_main_menu.system()),
+        )
+        .add_system_set(
+            SystemSet::on_update(GameState::MainMenu)
+                .with_system(handle_button_click.system()),
+        )
+        .add_system_set(
+            SystemSet::on_pause(GameState::MainMenu)
+                .with_system(tear_down_menu_items.system()),
+        )
+        .add_system_set(
+            SystemSet::on_exit(GameState::MainMenu)
+                .with_system(tear_down_menu_items.system()),
+        );
+    }
+}
+
 pub fn setup_main_menu(
     mut commands: Commands,
     asset_server: ResMut<AssetServer>,
