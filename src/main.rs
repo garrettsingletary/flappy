@@ -1,17 +1,16 @@
-mod states;
 mod menu;
-mod player;
 mod pipes;
+mod player;
+mod states;
 
-use states::GameState;
 use bevy::prelude::*;
 use menu::MenuPlugin;
+use pipes::*;
 use player::*;
-use pipes::PipesPlugin;
+use states::GameState;
 
 const WINDOW_HEIGHT: f32 = 1000.;
 const WINDOW_WIDTH: f32 = 1000.;
-
 
 fn setup_camera(mut commands: Commands) {
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
@@ -61,6 +60,12 @@ fn game_over(
     state.set(GameState::MainMenu).unwrap();
 }
 
+fn move_pipe(mut query: Query<(&mut Pipe, &mut Transform)>) {
+    for (pipe, mut transform) in query.iter_mut() {
+        transform.translation.x -= pipe.velocity;
+    }
+}
+
 fn main() {
     App::new()
         .insert_resource(WindowDescriptor {
@@ -79,7 +84,8 @@ fn main() {
         .add_system_set(
             SystemSet::on_update(GameState::Play)
                 .with_system(gravity_and_move)
-                .with_system(flap),
+                .with_system(flap)
+                .with_system(move_pipe)
         )
         .add_system_set(SystemSet::on_enter(GameState::GameOver).with_system(game_over))
         .run()

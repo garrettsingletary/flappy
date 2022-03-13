@@ -1,7 +1,6 @@
 use crate::states::GameState;
 use bevy::prelude::*;
 
-
 pub struct PlayerPlugin;
 
 const PLAYER_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);
@@ -12,17 +11,10 @@ pub struct Player {
     pub space_pressed: bool,
 }
 
-impl Plugin for PlayerPlugin{
+impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_system_set(
-            SystemSet::on_enter(GameState::Play)
-                .with_system(spawn_player.system()),
-            )
-            .add_system_set(
-            SystemSet::on_exit(GameState::Play)
-                .with_system(reset_player.system()),
-            );
+        app.add_system_set(SystemSet::on_enter(GameState::Play).with_system(spawn_player.system()))
+            .add_system_set(SystemSet::on_exit(GameState::Play).with_system(reset_player.system()));
     }
 }
 
