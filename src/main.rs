@@ -60,12 +60,6 @@ fn game_over(
     state.set(GameState::MainMenu).unwrap();
 }
 
-fn move_pipe(mut query: Query<(&mut Pipe, &mut Transform)>) {
-    for (pipe, mut transform) in query.iter_mut() {
-        transform.translation.x -= pipe.velocity;
-    }
-}
-
 fn main() {
     App::new()
         .insert_resource(WindowDescriptor {
@@ -84,8 +78,7 @@ fn main() {
         .add_system_set(
             SystemSet::on_update(GameState::Play)
                 .with_system(gravity_and_move)
-                .with_system(flap)
-                .with_system(move_pipe)
+                .with_system(flap), //                .with_system(move_pipe)
         )
         .add_system_set(SystemSet::on_enter(GameState::GameOver).with_system(game_over))
         .run()
